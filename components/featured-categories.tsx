@@ -6,9 +6,9 @@ import { Badge } from "@/components/ui/badge"
 const categories = [
   {
     name: "Football",
-    image: "/placeholder.png",
+    image: "footballblackfeature.png",
     href: "/products?category=football",
-    count: "120+ Items",
+    count: "100+ Items",
     color: "bg-green-500",
   },
   {
@@ -20,14 +20,14 @@ const categories = [
   },
   {
     name: "Soccer",
-    image: "(3).jpg",
+    image: "messifeature.png",
     href: "/products?category=soccer",
-    count: "200+ Items",
+    count: "120+ Items",
     color: "bg-blue-500",
   },
   {
     name: "Baseball",
-    image: "/placeholder-baseball.png",
+    image: "Baseballfeature.png",
     href: "/products?category=baseball",
     count: "95+ Items",
     color: "bg-red-500",

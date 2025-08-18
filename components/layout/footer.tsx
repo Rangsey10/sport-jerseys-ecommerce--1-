@@ -114,7 +114,7 @@ export function Footer() {
               </div>
               <div className="flex items-center space-x-3 text-gray-400">
                 <MapPin className="h-4 w-4" />
-                <span className="text-sm">New York, NY</span>
+                <span className="text-sm">KampongCham, Cambodia</span>
               </div>
             </div>
 
@@ -134,7 +134,7 @@ export function Footer() {
 
         <div className="border-t border-gray-800 mt-12 pt-8">
           <div className="flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0">
-            <p className="text-gray-400 text-sm">© 2024 Jersey Store. All rights reserved.</p>
+            <p className="text-gray-400 text-sm">© 2025 Jersey Store. All rights reserved.</p>
             <div className="flex space-x-6">
               <Link href="/privacy" className="text-gray-400 hover:text-white text-sm transition-colors">
                 Privacy Policy
