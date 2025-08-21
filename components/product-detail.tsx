@@ -29,6 +29,9 @@ export function ProductDetail({ productId }: ProductDetailProps) {
     // Simulate API call
     const foundProduct = mockProducts.find((p) => p.id === productId)
     setProduct(foundProduct || null)
+    if (foundProduct && foundProduct.sizes && foundProduct.sizes.length > 0) {
+      setSelectedSize(foundProduct.sizes[0])
+    }
   }, [productId])
 
   if (!product) {

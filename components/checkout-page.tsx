@@ -1,7 +1,6 @@
 "use client"
 
 import type React from "react"
-
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -32,6 +31,7 @@ export function CheckoutPage() {
     expiry: "",
     cvv: "",
     cardName: "",
+    sameAsShipping: false,
   })
   const router = useRouter()
 
@@ -42,9 +42,34 @@ export function CheckoutPage() {
     }))
   }
 
+  const validatePayment = () => {
+    const cardRegex = /^\d{16}$/ // simple 16-digit check
+    const expiryRegex = /^(0[1-9]|1[0-2])\/\d{2}$/ // MM/YY
+    const cvvRegex = /^\d{3,4}$/ // 3 or 4 digits
+
+    if (!cardRegex.test(formData.cardNumber.replace(/\s+/g, ""))) {
+      toast({ title: "Invalid Card Number", description: "Card number must be 16 digits." })
+      return false
+    }
+    if (!expiryRegex.test(formData.expiry)) {
+      toast({ title: "Invalid Expiry Date", description: "Format must be MM/YY." })
+      return false
+    }
+    if (!cvvRegex.test(formData.cvv)) {
+      toast({ title: "Invalid CVV", description: "CVV must be 3 or 4 digits." })
+      return false
+    }
+    return true
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsProcessing(true)
+
+    if (!validatePayment()) {
+      setIsProcessing(false)
+      return
+    }
 
     // Simulate payment processing
     setTimeout(() => {
@@ -185,6 +210,8 @@ export function CheckoutPage() {
                     <Input
                       id="cardNumber"
                       name="cardNumber"
+                      type="tel"
+                      inputMode="numeric"
                       placeholder="1234 5678 9012 3456"
                       value={formData.cardNumber}
                       onChange={handleChange}
@@ -198,6 +225,8 @@ export function CheckoutPage() {
                       <Input
                         id="expiry"
                         name="expiry"
+                        type="tel"
+                        inputMode="numeric"
                         placeholder="MM/YY"
                         value={formData.expiry}
                         onChange={handleChange}
@@ -209,6 +238,8 @@ export function CheckoutPage() {
                       <Input
                         id="cvv"
                         name="cvv"
+                        type="password"
+                        inputMode="numeric"
                         placeholder="123"
                         value={formData.cvv}
                         onChange={handleChange}
@@ -223,7 +254,13 @@ export function CheckoutPage() {
                   </div>
 
                   <div className="flex items-center space-x-2">
-                    <Checkbox id="sameAsShipping" />
+                    <Checkbox
+                      id="sameAsShipping"
+                      checked={formData.sameAsShipping}
+                      onCheckedChange={(checked) =>
+                        setFormData((prev) => ({ ...prev, sameAsShipping: !!checked }))
+                      }
+                    />
                     <Label htmlFor="sameAsShipping" className="text-sm">
                       Billing address same as shipping
                     </Label>

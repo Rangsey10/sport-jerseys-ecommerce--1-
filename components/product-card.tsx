@@ -141,7 +141,7 @@ export function ProductCard({ product }: ProductCardProps) {
       </CardContent>
 
       <CardFooter className="p-6 pt-0">
-        <Button onClick={handleAddToCart} className="w-full" size="lg">
+        <Button onClick={handleAddToCart} className="w-full h-12 text-base" size="lg">
           <ShoppingCart className="h-4 w-4 mr-2" />
           Add to Cart
         </Button>

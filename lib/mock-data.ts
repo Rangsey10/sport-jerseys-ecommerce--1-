@@ -9,9 +9,9 @@ export const mockProducts: Product[] = [
     price: 89.99,
     originalPrice: 119.99,
     images: [
-      "LAL+MNK+DF+SWGMN+JSY+ASC+22.avif",
-      "LAL+MNK+DF+SWGMN+JSY+ASC+22.avif",
-      "LAL+MNK+DF+SWGMN+JSY+ASC+22.avif",
+      "/LAL+MNK+DF+SWGMN+JSY+ASC+22.avif",
+      "/LAL+MNK+DF+SWGMN+JSY+ASC+22.avif",
+      "/LAL+MNK+DF+SWGMN+JSY+ASC+22.avif",
     ],
     category: "basketball",
     team: "Los Angeles Lakers",
@@ -28,7 +28,7 @@ export const mockProducts: Product[] = [
     description:
       "Golden State Warriors official jersey featuring Stephen Curry #30. Perfect for game day or casual wear. Features the team's iconic colors and premium construction.",
     price: 94.99,
-    images: ["Stephen curry.png", "Stephen curry.png"],
+    images: ["/Stephen curry.png", "/Stephen curry.png"],
     category: "basketball",
     team: "Golden State Warriors",
     sizes: ["XS", "S", "M", "L", "XL", "XXL"],
@@ -43,7 +43,7 @@ export const mockProducts: Product[] = [
     description:
       "Dallas Cowboys official NFL jersey featuring Dak Prescott #4. Show your team spirit with this authentic jersey made from high-quality materials.",
     price: 79.99,
-    images: ["200710039_White_BCK.webp", "200710039_White_BCK.webp"],
+    images: ["/200710039_White_BCK.webp", "/200710039_White_BCK.webp"],
     category: "football",
     team: "Dallas Cowboys",
     sizes: ["XS", "S", "M", "L", "XL", "XXL"],
@@ -59,7 +59,7 @@ export const mockProducts: Product[] = [
       "New England Patriots legendary Tom Brady #12 jersey. A must-have for any Patriots fan. This iconic jersey represents one of the greatest quarterbacks in NFL history.",
     price: 99.99,
     originalPrice: 129.99,
-    images: ["mens-nike-tom-brady-red-new-england-patriots-retired-player-alternate-game-jersey_pi5342000_altimages_ff_5342956-3d9d9a94311c6295859ealt3_full.jpg", "mens-nike-tom-brady-red-new-england-patriots-retired-player-alternate-game-jersey_pi5342000_altimages_ff_5342956-3d9d9a94311c6295859ealt3_full.jpg"],
+    images: ["/mens-nike-tom-brady-red-new-england-patriots-retired-player-alternate-game-jersey_pi5342000_altimages_ff_5342956-3d9d9a94311c6295859ealt3_full.jpg", "/mens-nike-tom-brady-red-new-england-patriots-retired-player-alternate-game-jersey_pi5342000_altimages_ff_5342956-3d9d9a94311c6295859ealt3_full.jpg"],
     category: "football",
     team: "New England Patriots",
     sizes: ["XS", "S", "M", "L", "XL", "XXL"],
@@ -75,7 +75,7 @@ export const mockProducts: Product[] = [
     description:
       "New York Yankees Aaron Judge #99 jersey. Official MLB merchandise with premium quality. Perfect for baseball fans and collectors alike.",
     price: 84.99,
-    images: ["Yankee.png", "Yankee.png"],
+    images: ["/Yankee.png", "/Yankee.png"],
     category: "baseball",
     team: "New York Yankees",
     sizes: ["XS", "S", "M", "L", "XL", "XXL"],
@@ -90,7 +90,7 @@ export const mockProducts: Product[] = [
     description:
       "Los Angeles Dodgers Mookie Betts #50 jersey. Perfect for baseball fans and collectors. Features authentic team colors and professional-grade construction.",
     price: 79.99,
-    images: ["Mookie.png", "Mookie.png"],
+    images: ["/Mookie.png", "/Mookie.png"],
     category: "baseball",
     team: "Los Angeles Dodgers",
     sizes: ["XS", "S", "M", "L", "XL", "XXL"],
@@ -105,7 +105,7 @@ export const mockProducts: Product[] = [
     description:
       "Manchester United Cristiano Ronaldo #7 jersey. Official Premier League merchandise featuring the legendary player's iconic number.",
     price: 89.99,
-    images: ["CristanoRonaldo.png", "CristanoRonaldo.png"],
+    images: ["/CristanoRonaldo.png", "/CristanoRonaldo.png"],
     category: "soccer",
     team: "Manchester United",
     sizes: ["XS", "S", "M", "L", "XL", "XXL"],
@@ -121,7 +121,7 @@ export const mockProducts: Product[] = [
       "FC Barcelona legendary Lionel Messi #10 jersey. A classic piece for any soccer fan. This jersey represents one of the greatest players of all time.",
     price: 94.99,
     originalPrice: 114.99,
-    images: ["LionelMessi.png", "LionelMessi.png"],
+    images: ["/LionelMessi.png", "/LionelMessi.png"],
     category: "soccer",
     team: "FC Barcelona",
     sizes: ["XS", "S", "M", "L", "XL", "XXL"],
@@ -137,7 +137,7 @@ export const mockProducts: Product[] = [
     description:
       "Kansas City Chiefs Patrick Mahomes #15 jersey. Official NFL merchandise featuring the Super Bowl champion quarterback.",
     price: 104.99,
-    images: ["/placeholder.png?height=600&width=600", "/placeholder.png?height=600&width=600"],
+    images: ["/Mahomes.png", "/Mahomes.png"],
     category: "football",
     team: "Kansas City Chiefs",
     sizes: ["XS", "S", "M", "L", "XL", "XXL"],
@@ -152,7 +152,7 @@ export const mockProducts: Product[] = [
     description:
       "Boston Celtics Jayson Tatum #0 jersey. Official NBA merchandise featuring one of the league's rising stars.",
     price: 92.99,
-    images: ["/placeholder.png", "/placeholder.png"],
+    images: ["/Tatum.png", "/Tatum.png"],
     category: "basketball",
     team: "Boston Celtics",
     sizes: ["XS", "S", "M", "L", "XL", "XXL"],
