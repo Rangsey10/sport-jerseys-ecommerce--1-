@@ -7,12 +7,14 @@ For the application to work properly in production, you need to set up the follo
 ### Required Variables
 
 #### Supabase Configuration
+
 ```env
 NEXT_PUBLIC_SUPABASE_URL=https://your-project-id.supabase.co
 NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
 
 #### Stripe Configuration (Optional - for payment functionality)
+
 ```env
 STRIPE_SECRET_KEY=sk_live_your_stripe_secret_key
 NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_your_stripe_publishable_key
@@ -36,11 +38,13 @@ STRIPE_WEBHOOK_SECRET=whsec_your_webhook_secret
 ## Supabase Setup
 
 ### 1. Create a Supabase Project
+
 1. Go to [supabase.com](https://supabase.com)
 2. Create a new project
 3. Copy your project URL and anon key
 
 ### 2. Database Setup
+
 Run the following SQL scripts in your Supabase SQL editor:
 
 ```sql
@@ -107,8 +111,8 @@ CREATE POLICY "Users can view their own orders" ON orders
 CREATE POLICY "Admins can view all orders" ON orders
   FOR SELECT USING (
     EXISTS (
-      SELECT 1 FROM profiles 
-      WHERE profiles.id = auth.uid() 
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
       AND profiles.role = 'admin'
     )
   );
@@ -121,14 +125,15 @@ CREATE POLICY "Products are readable by everyone" ON products
 CREATE POLICY "Admins can manage products" ON products
   FOR ALL USING (
     EXISTS (
-      SELECT 1 FROM profiles 
-      WHERE profiles.id = auth.uid() 
+      SELECT 1 FROM profiles
+      WHERE profiles.id = auth.uid()
       AND profiles.role = 'admin'
     )
   );
 ```
 
 ### 3. Create an Admin User
+
 After deployment, you can create an admin user by:
 
 1. Registering a new account through your application
@@ -167,6 +172,7 @@ The application is designed to build successfully even without environment varia
 ## Support
 
 If you encounter any issues during deployment, check:
+
 1. Environment variables are correctly set
 2. Supabase project is active and accessible
 3. Database tables and RLS policies are properly configured

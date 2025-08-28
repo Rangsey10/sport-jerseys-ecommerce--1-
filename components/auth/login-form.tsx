@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Eye, EyeOff, Chrome } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
-import { createSimpleClient } from "@/lib/supabase/simple-client"
+import { createSafeClientComponentClient } from "@/lib/supabase/safe-clients"
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
@@ -25,13 +25,25 @@ export function LoginForm() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const router = useRouter()
-  const supabase = createSimpleClient()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
 
     try {
+      // Get supabase client
+      const supabase = await createSafeClientComponentClient()
+      
+      // Check if supabase client is available
+      if (!supabase) {
+        toast({
+          title: "Connection Error",
+          description: "Unable to connect to authentication service",
+          variant: "destructive",
+        })
+        return
+      }
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,

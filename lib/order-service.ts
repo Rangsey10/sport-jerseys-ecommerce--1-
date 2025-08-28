@@ -79,7 +79,6 @@ export const orderService = {
 
       return { success: true, orderId: order.id }
     } catch (error) {
-      console.error('Order creation error:', error)
       return { success: false, error: 'Unexpected error occurred' }
     }
   },
@@ -98,11 +97,10 @@ export const orderService = {
       .order('created_at', { ascending: false })
 
     if (error) {
-      console.error('Error fetching orders:', error)
       return []
     }
 
-    return orders?.map(order => ({
+    return orders?.map((order: any) => ({
       ...order,
       user_email: order.profiles?.email,
       user_name: `${order.profiles?.first_name} ${order.profiles?.last_name}`.trim()
@@ -122,7 +120,6 @@ export const orderService = {
       .order('created_at', { ascending: false })
 
     if (error) {
-      console.error('Error fetching user orders:', error)
       return []
     }
 

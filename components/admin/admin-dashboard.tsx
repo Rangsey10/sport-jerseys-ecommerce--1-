@@ -1,15 +1,20 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import Link from "next/link"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { BarChart3, Package, ShoppingCart, Users, Plus, Edit, Trash2, Eye } from "lucide-react"
+import { BarChart3, Package, ShoppingCart, Users, Plus, Edit, Trash2, Eye, ChevronLeft } from "lucide-react"
 import { orderService, type Order } from "@/lib/order-service"
 import { toast } from "@/hooks/use-toast"
+import { AdminHeader } from "./admin-header"
+import { AdminQuickActions } from "./admin-quick-actions"
+import { AdminTableActions } from "./admin-table-actions"
+import { AdminTableFilters } from "./admin-table-filters"
 
 export function AdminDashboard() {
   const [orders, setOrders] = useState<Order[]>([])
@@ -79,6 +84,29 @@ export function AdminDashboard() {
     },
   ]
 
+  const quickActionsStats = {
+    totalOrders: orders.length,
+    lowStockItems: 5, // Mock data
+    pendingOrders: orders.filter(order => order.status === 'pending').length,
+    revenue: orders.reduce((sum, order) => sum + order.total_amount, 0)
+  }
+
+  const orderFilters = {
+    status: [
+      { label: "Pending", value: "pending", count: orders.filter(o => o.status === 'pending').length },
+      { label: "Processing", value: "processing", count: orders.filter(o => o.status === 'processing').length },
+      { label: "Shipped", value: "shipped", count: orders.filter(o => o.status === 'shipped').length },
+      { label: "Delivered", value: "delivered", count: orders.filter(o => o.status === 'delivered').length },
+      { label: "Cancelled", value: "cancelled", count: orders.filter(o => o.status === 'cancelled').length },
+    ],
+    dateRange: [
+      { label: "Today", value: "today" },
+      { label: "This Week", value: "week" },
+      { label: "This Month", value: "month" },
+      { label: "This Year", value: "year" },
+    ]
+  }
+
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
       case 'completed':
@@ -103,13 +131,11 @@ export function AdminDashboard() {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <div className="flex items-center justify-between mb-8">
-        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-        <Button>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Product
-        </Button>
-      </div>
+      {/* Enhanced Admin Header */}
+      <AdminHeader title="Admin Dashboard" onRefresh={loadOrders} />
+
+      {/* Quick Actions */}
+      <AdminQuickActions stats={quickActionsStats} />
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -129,19 +155,68 @@ export function AdminDashboard() {
         ))}
       </div>
 
+      {/* Quick Actions Bar */}
+      <div className="flex items-center gap-3 mb-6 p-4 bg-gray-50 rounded-lg">
+        <h3 className="text-sm font-medium text-gray-700">Quick Actions:</h3>
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => toast({
+            title: "Bulk Actions",
+            description: "Bulk order processing panel would open here"
+          })}
+        >
+          <ShoppingCart className="h-4 w-4 mr-2" />
+          Process Orders
+        </Button>
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => toast({
+            title: "Inventory Check",
+            description: "Low stock alerts would be shown here"
+          })}
+        >
+          <Package className="h-4 w-4 mr-2" />
+          Check Inventory
+        </Button>
+        <Button 
+          variant="outline" 
+          size="sm"
+          onClick={() => toast({
+            title: "Generate Reports",
+            description: "Sales and analytics reports would be generated"
+          })}
+        >
+          <BarChart3 className="h-4 w-4 mr-2" />
+          Generate Report
+        </Button>
+      </div>
+
       <Tabs defaultValue="orders" className="space-y-4">
         <TabsList>
           <TabsTrigger value="orders">Recent Orders</TabsTrigger>
           <TabsTrigger value="products">Products</TabsTrigger>
+          <TabsTrigger value="featured">Featured Items</TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
         </TabsList>
 
         <TabsContent value="orders">
           <Card>
             <CardHeader>
-              <CardTitle>Recent Orders</CardTitle>
+              <CardTitle>Order Management</CardTitle>
             </CardHeader>
             <CardContent>
+              {/* Advanced Filters */}
+              <AdminTableFilters
+                searchPlaceholder="Search orders by ID, customer name, or email..."
+                filters={orderFilters}
+                onSearch={(query) => console.log("Search:", query)}
+                onFilter={(filters) => console.log("Filters:", filters)}
+                onExport={() => toast({ title: "Export Orders", description: "Orders exported to CSV" })}
+                onImport={() => toast({ title: "Import Orders", description: "Order import functionality" })}
+              />
+
               {loading ? (
                 <div className="text-center py-4">Loading orders...</div>
               ) : (
@@ -186,9 +261,11 @@ export function AdminDashboard() {
                           </Select>
                         </TableCell>
                         <TableCell>
-                          <Button variant="ghost" size="sm">
-                            <Eye className="h-4 w-4" />
-                          </Button>
+                          <AdminTableActions
+                            itemId={order.id!}
+                            itemName={`Order #${order.id?.slice(0, 8)}`}
+                            type="order"
+                          />
                         </TableCell>
                       </TableRow>
                     ))}
@@ -201,10 +278,44 @@ export function AdminDashboard() {
 
         <TabsContent value="products">
           <Card>
-            <CardHeader>
+            <CardHeader className="flex flex-row items-center justify-between">
               <CardTitle>Product Management</CardTitle>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" asChild>
+                  <Link href="/admin/products/import">
+                    <Package className="h-4 w-4 mr-2" />
+                    Import Products
+                  </Link>
+                </Button>
+                <Button size="sm" asChild>
+                  <Link href="/admin/products/new">
+                    <Plus className="h-4 w-4 mr-2" />
+                    New Product
+                  </Link>
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
+              {/* Product Filters */}
+              <AdminTableFilters
+                searchPlaceholder="Search products by name, category, or SKU..."
+                filters={{
+                  status: [
+                    { label: "Active", value: "active", count: 2 },
+                    { label: "Out of Stock", value: "out-of-stock", count: 1 },
+                    { label: "Discontinued", value: "discontinued", count: 0 },
+                  ],
+                  category: [
+                    { label: "Basketball", value: "basketball" },
+                    { label: "Football", value: "football" },
+                    { label: "Baseball", value: "baseball" },
+                    { label: "Soccer", value: "soccer" },
+                  ]
+                }}
+                onSearch={(query) => console.log("Search products:", query)}
+                onFilter={(filters) => console.log("Product filters:", filters)}
+              />
+
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -229,14 +340,11 @@ export function AdminDashboard() {
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <div className="flex space-x-2">
-                          <Button variant="ghost" size="sm">
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button variant="ghost" size="sm">
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+                        <AdminTableActions
+                          itemId={product.id.toString()}
+                          itemName={product.name}
+                          type="product"
+                        />
                       </TableCell>
                     </TableRow>
                   ))}
@@ -246,13 +354,112 @@ export function AdminDashboard() {
           </Card>
         </TabsContent>
 
-        <TabsContent value="users">
+        <TabsContent value="featured">
           <Card>
-            <CardHeader>
-              <CardTitle>User Management</CardTitle>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>Featured Products Management</CardTitle>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm" asChild>
+                  <Link href="/">
+                    <Eye className="h-4 w-4 mr-2" />
+                    View Hero Section
+                  </Link>
+                </Button>
+                <Button size="sm">
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Featured Item
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
-              <p>User management interface would go here...</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {[
+                  { name: "Cristiano Ronaldo Jersey", image: "/CristanoRonaldo.png", position: "Hero Position 1" },
+                  { name: "Lionel Messi Jersey", image: "/LionelMessi.png", position: "Hero Position 2" },
+                  { name: "Stephen Curry Jersey", image: "/Stephen curry.png", position: "Hero Position 3" },
+                  { name: "Jayson Tatum Jersey", image: "/Tatum.png", position: "Hero Position 4" }
+                ].map((item, index) => (
+                  <Card key={index} className="overflow-hidden">
+                    <div className="aspect-square relative bg-gray-100">
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Package className="h-8 w-8 text-gray-400" />
+                      </div>
+                    </div>
+                    <CardContent className="p-4">
+                      <h4 className="font-medium text-sm mb-1">{item.name}</h4>
+                      <p className="text-xs text-gray-500 mb-3">{item.position}</p>
+                      <div className="flex gap-2">
+                        <Button size="sm" variant="outline" className="flex-1">
+                          <Edit className="h-3 w-3" />
+                        </Button>
+                        <Button size="sm" variant="outline" className="flex-1">
+                          <Eye className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+              <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+                <p className="text-sm text-blue-800">
+                  <strong>Tip:</strong> These are the jerseys displayed in your store's hero section. 
+                  <Link href="/" className="underline ml-1">View live hero section</Link> to see how they appear to customers.
+                </p>
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="users">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between">
+              <CardTitle>User Management</CardTitle>
+              <div className="flex items-center gap-2">
+                <Button variant="outline" size="sm">
+                  <Users className="h-4 w-4 mr-2" />
+                  Export Users
+                </Button>
+                <Button 
+                  size="sm"
+                  onClick={() => toast({
+                    title: "Create Admin User",
+                    description: "Admin user creation panel would open here"
+                  })}
+                >
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Admin
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="text-center py-8">
+                <Users className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+                <h3 className="text-lg font-medium mb-2">User Management</h3>
+                <p className="text-gray-500 mb-4">
+                  View and manage user accounts, roles, and permissions.
+                </p>
+                <div className="flex justify-center gap-3">
+                  <Button 
+                    variant="outline"
+                    onClick={() => toast({
+                      title: "View All Users",
+                      description: "User list functionality coming soon"
+                    })}
+                  >
+                    <Users className="h-4 w-4 mr-2" />
+                    View All Users
+                  </Button>
+                  <Button 
+                    onClick={() => toast({
+                      title: "User Analytics",
+                      description: "User analytics dashboard coming soon"
+                    })}
+                  >
+                    <BarChart3 className="h-4 w-4 mr-2" />
+                    User Analytics
+                  </Button>
+                </div>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

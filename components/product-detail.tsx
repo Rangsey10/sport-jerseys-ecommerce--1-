@@ -75,8 +75,8 @@ export function ProductDetail({ productId }: ProductDetailProps) {
       description: `${product.name} (${selectedSize}) has been added to your cart.`,
     })
     
-    // Redirect to cart page
-    router.push("/cart")
+    // Don't redirect to cart page - stay on product page
+    // User can manually navigate to cart if they want
   }
 
   const handleWishlist = () => {

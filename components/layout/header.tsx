@@ -24,6 +24,7 @@ import { useCart } from "@/hooks/use-cart"
 export function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
   const [user, setUser] = useState<User | null>(null)
+  const [userProfile, setUserProfile] = useState<any>(null)
   const { items } = useCart()
   const router = useRouter()
   const itemCount = items.reduce((total, item) => total + item.quantity, 0)
@@ -35,6 +36,17 @@ export function Header() {
         if (supabase) {
           const { data } = await supabase.auth.getUser()
           setUser(data.user)
+          
+          // Get user profile with role information
+          if (data.user) {
+            const { data: profile } = await supabase
+              .from('profiles')
+              .select('*')
+              .eq('id', data.user.id)
+              .single()
+            
+            setUserProfile(profile)
+          }
         }
       } catch (error) {
         console.error('Error getting user:', error)
@@ -50,12 +62,15 @@ export function Header() {
         await supabase.auth.signOut()
       }
       setUser(null)
+      setUserProfile(null)
       router.push("/")
       router.refresh()
     } catch (error) {
       console.error('Error signing out:', error)
     }
   }
+
+  const isAdmin = userProfile?.role === 'admin'
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -85,6 +100,13 @@ export function Header() {
             <Link href="/about" className="text-sm font-medium hover:text-blue-600 transition-colors">
               About
             </Link>
+            {/* Admin Link in Navigation */}
+            {isAdmin && (
+              <Link href="/admin" className="text-sm font-medium text-white bg-gradient-to-r from-blue-600 to-purple-600 px-4 py-2 rounded-lg hover:from-blue-700 hover:to-purple-700 transition-all duration-200 shadow-md">
+                <LayoutDashboard className="inline h-4 w-4 mr-2" />
+                Admin Panel
+              </Link>
+            )}
           </nav>
 
           {/* Search Bar */}
@@ -104,6 +126,16 @@ export function Header() {
             <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setIsSearchOpen(!isSearchOpen)}>
               <Search className="h-5 w-5" />
             </Button>
+
+            {/* Admin Button - Only show for admin users */}
+            {isAdmin && (
+              <Button variant="outline" size="sm" asChild className="hidden md:flex border-blue-200 bg-blue-50 hover:bg-blue-100 text-blue-700">
+                <Link href="/admin">
+                  <LayoutDashboard className="h-4 w-4 mr-2" />
+                  Admin Panel
+                </Link>
+              </Button>
+            )}
 
             <Button variant="ghost" size="icon" className="relative">
               <Heart className="h-5 w-5" />
@@ -130,16 +162,18 @@ export function Header() {
                 <DropdownMenuContent align="end">
                   <DropdownMenuLabel>My Account</DropdownMenuLabel>
                   <DropdownMenuSeparator />
-                  <DropdownMenuItem asChild>
-                    <Link href="/admin">
-                      <LayoutDashboard className="mr-2 h-4 w-4" />
-                      <span>Dashboard</span>
-                    </Link>
-                  </DropdownMenuItem>
+                  {isAdmin && (
+                    <DropdownMenuItem asChild>
+                      <Link href="/admin">
+                        <LayoutDashboard className="mr-2 h-4 w-4" />
+                        <span>Admin Dashboard</span>
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem asChild>
                     <Link href="/orders">
                       <ShoppingCart className="mr-2 h-4 w-4" />
-                      <span>Orders</span>
+                      <span>My Orders</span>
                     </Link>
                   </DropdownMenuItem>
                   <DropdownMenuSeparator />
@@ -151,7 +185,7 @@ export function Header() {
               </DropdownMenu>
             ) : (
               <Button variant="ghost" size="sm" asChild>
-                <Link href="/auth/login">Sign out</Link>
+                <Link href="/auth/login">Sign In</Link>
               </Button>
             )}
 
@@ -179,11 +213,17 @@ export function Header() {
                   <hr />
                   {user ? (
                     <>
-                      <Link href="/admin" className="text-lg font-medium hover:text-blue-600 transition-colors">
-                        Dashboard
-                      </Link>
+                      {isAdmin && (
+                        <>
+                          <Link href="/admin" className="text-lg font-medium text-blue-600 hover:text-blue-700 transition-colors flex items-center gap-2">
+                            <LayoutDashboard className="h-5 w-5" />
+                            Admin Dashboard
+                          </Link>
+                          <hr />
+                        </>
+                      )}
                       <Link href="/orders" className="text-lg font-medium hover:text-blue-600 transition-colors">
-                        Orders
+                        My Orders
                       </Link>
                       <Button onClick={handleLogout} variant="ghost" className="justify-start text-lg font-medium">Log Out</Button>
                     </>
