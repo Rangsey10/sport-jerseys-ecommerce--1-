@@ -18,15 +18,26 @@ export async function middleware(req: NextRequest) {
   // Protect admin routes
   if (req.nextUrl.pathname.startsWith("/admin")) {
     if (!session) {
+      console.log('No session, redirecting to login')
       return NextResponse.redirect(new URL("/auth/login", req.url))
     }
 
     // Check if user is admin
-    const { data: profile } = await supabase.from("profiles").select("role").eq("id", session.user.id).single()
+    const { data: profile, error } = await supabase.from("profiles").select("role").eq("id", session.user.id).single()
+
+    console.log('Admin route access attempt:', {
+      userId: session.user.id,
+      userRole: profile?.role,
+      pathname: req.nextUrl.pathname,
+      error: error?.message
+    })
 
     if (profile?.role !== "admin") {
-      return NextResponse.redirect(new URL("/", req.url))
+      console.log('User is not admin, redirecting to homepage')
+      return NextResponse.redirect(new URL("/homepage", req.url))
     }
+
+    console.log('Admin access granted')
   }
 
   // Protect checkout, cart, and orders routes

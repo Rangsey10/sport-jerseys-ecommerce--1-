@@ -1,25 +1,99 @@
 "use client"
 
+import { useState, useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { BarChart3, Package, ShoppingCart, Users, Plus, Edit, Trash2 } from "lucide-react"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { BarChart3, Package, ShoppingCart, Users, Plus, Edit, Trash2, Eye } from "lucide-react"
+import { orderService, type Order } from "@/lib/order-service"
+import { toast } from "@/hooks/use-toast"
 
 export function AdminDashboard() {
+  const [orders, setOrders] = useState<Order[]>([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    loadOrders()
+  }, [])
+
+  const loadOrders = async () => {
+    try {
+      const ordersData = await orderService.getAllOrders()
+      setOrders(ordersData)
+    } catch (error) {
+      console.error('Error loading orders:', error)
+      toast({
+        title: "Error",
+        description: "Failed to load orders",
+        variant: "destructive"
+      })
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleStatusUpdate = async (orderId: string, newStatus: Order['status']) => {
+    const success = await orderService.updateOrderStatus(orderId, newStatus)
+    if (success) {
+      toast({
+        title: "Success",
+        description: "Order status updated successfully"
+      })
+      loadOrders() // Reload orders
+    } else {
+      toast({
+        title: "Error",
+        description: "Failed to update order status",
+        variant: "destructive"
+      })
+    }
+  }
+
   const stats = [
-    { title: "Total Products", value: "156", icon: Package, change: "+12%" },
-    { title: "Total Orders", value: "1,234", icon: ShoppingCart, change: "+8%" },
-    { title: "Total Users", value: "5,678", icon: Users, change: "+15%" },
-    { title: "Revenue", value: "$45,678", icon: BarChart3, change: "+23%" },
+    { 
+      title: "Total Products", 
+      value: "156", 
+      icon: Package, 
+      change: "+12%" 
+    },
+    { 
+      title: "Total Orders", 
+      value: orders.length.toString(), 
+      icon: ShoppingCart, 
+      change: "+8%" 
+    },
+    { 
+      title: "Total Revenue", 
+      value: `$${orders.reduce((sum, order) => sum + order.total_amount, 0).toFixed(2)}`, 
+      icon: BarChart3, 
+      change: "+23%" 
+    },
+    { 
+      title: "Pending Orders", 
+      value: orders.filter(order => order.status === 'pending').length.toString(), 
+      icon: Users, 
+      change: "+15%" 
+    },
   ]
 
-  const recentOrders = [
-    { id: "#1234", customer: "John Doe", product: "Lakers Jersey", amount: "$89.99", status: "Completed" },
-    { id: "#1235", customer: "Jane Smith", product: "Warriors Jersey", amount: "$94.99", status: "Processing" },
-    { id: "#1236", customer: "Mike Johnson", product: "Cowboys Jersey", amount: "$79.99", status: "Shipped" },
-  ]
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status) {
+      case 'completed':
+      case 'delivered':
+        return 'default'
+      case 'processing':
+        return 'secondary'
+      case 'shipped':
+        return 'outline'
+      case 'cancelled':
+        return 'destructive'
+      default:
+        return 'secondary'
+    }
+  }
 
   const products = [
     { id: 1, name: "Lakers Jersey", category: "Basketball", price: "$89.99", stock: 25, status: "Active" },
@@ -68,36 +142,59 @@ export function AdminDashboard() {
               <CardTitle>Recent Orders</CardTitle>
             </CardHeader>
             <CardContent>
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Order ID</TableHead>
-                    <TableHead>Customer</TableHead>
-                    <TableHead>Product</TableHead>
-                    <TableHead>Amount</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {recentOrders.map((order) => (
-                    <TableRow key={order.id}>
-                      <TableCell className="font-medium">{order.id}</TableCell>
-                      <TableCell>{order.customer}</TableCell>
-                      <TableCell>{order.product}</TableCell>
-                      <TableCell>{order.amount}</TableCell>
-                      <TableCell>
-                        <Badge variant={order.status === "Completed" ? "default" : "secondary"}>{order.status}</Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Button variant="ghost" size="sm">
-                          View
-                        </Button>
-                      </TableCell>
+              {loading ? (
+                <div className="text-center py-4">Loading orders...</div>
+              ) : (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Order ID</TableHead>
+                      <TableHead>Customer</TableHead>
+                      <TableHead>Items</TableHead>
+                      <TableHead>Amount</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {orders.slice(0, 10).map((order) => (
+                      <TableRow key={order.id}>
+                        <TableCell className="font-medium">#{order.id?.slice(0, 8)}</TableCell>
+                        <TableCell>
+                          <div>
+                            <p className="font-medium">{order.user_name || 'Unknown'}</p>
+                            <p className="text-sm text-gray-500">{order.user_email}</p>
+                          </div>
+                        </TableCell>
+                        <TableCell>{order.order_items?.length || 0} items</TableCell>
+                        <TableCell>${order.total_amount.toFixed(2)}</TableCell>
+                        <TableCell>
+                          <Select
+                            value={order.status}
+                            onValueChange={(value) => handleStatusUpdate(order.id!, value as Order['status'])}
+                          >
+                            <SelectTrigger className="w-32">
+                              <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="pending">Pending</SelectItem>
+                              <SelectItem value="processing">Processing</SelectItem>
+                              <SelectItem value="shipped">Shipped</SelectItem>
+                              <SelectItem value="delivered">Delivered</SelectItem>
+                              <SelectItem value="cancelled">Cancelled</SelectItem>
+                            </SelectContent>
+                          </Select>
+                        </TableCell>
+                        <TableCell>
+                          <Button variant="ghost" size="sm">
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

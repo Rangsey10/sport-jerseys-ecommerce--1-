@@ -14,6 +14,7 @@ import { Badge } from "@/components/ui/badge"
 import { CreditCard, Lock, ArrowLeft, CheckCircle } from "lucide-react"
 import { useCart } from "@/hooks/use-cart"
 import { toast } from "@/hooks/use-toast"
+import { orderService } from "@/lib/order-service"
 import Image from "next/image"
 
 export function CheckoutPage() {
@@ -71,16 +72,41 @@ export function CheckoutPage() {
       return
     }
 
-    // Simulate payment processing
-    setTimeout(() => {
+    try {
+      // Create shipping address object
+      const shippingAddress = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        zipCode: formData.zipCode
+      }
+
+      // Create order in database
+      const result = await orderService.createOrder(items, shippingAddress)
+
+      if (result.success) {
+        toast({
+          title: "Order placed successfully!",
+          description: `Order #${result.orderId?.slice(0, 8)} has been created. Thank you for your purchase!`,
+        })
+        clearCart()
+        router.push("/orders")
+      } else {
+        throw new Error(result.error || 'Failed to create order')
+      }
+    } catch (error) {
+      console.error('Checkout error:', error)
       toast({
-        title: "Order placed successfully!",
-        description: "Thank you for your purchase. You'll receive a confirmation email shortly.",
+        title: "Order failed",
+        description: "There was an error processing your order. Please try again.",
+        variant: "destructive"
       })
-      clearCart()
+    } finally {
       setIsProcessing(false)
-      router.push("/order-confirmation")
-    }, 2000)
+    }
   }
 
   if (items.length === 0) {

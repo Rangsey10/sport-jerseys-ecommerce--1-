@@ -17,9 +17,10 @@ import { useRouter } from "next/navigation"
 
 interface ProductCardProps {
   product: Product
+  showNewBadge?: boolean
 }
 
-export function ProductCard({ product }: ProductCardProps) {
+export function ProductCard({ product, showNewBadge = false }: ProductCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isWishlisted, setIsWishlisted] = useState(false)
   const { addItem } = useCart()
@@ -94,6 +95,7 @@ export function ProductCard({ product }: ProductCardProps) {
 
           {/* Badges */}
           <div className="absolute top-4 left-4 flex flex-col gap-2">
+            {showNewBadge && <Badge className="bg-green-500 text-white">NEW</Badge>}
             {product.isOnSale && <Badge className="bg-red-500 text-white">-{discountPercentage}%</Badge>}
             {product.stock_quantity && product.stock_quantity < 10 && (
               <Badge variant="outline" className="bg-white/90">

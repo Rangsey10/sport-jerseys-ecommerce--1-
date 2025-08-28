@@ -4,14 +4,14 @@ import Link from "next/link"
 import { useAuth } from "@/hooks/useAuth"
 import { Button } from "@/components/ui/button"
 import { Icons } from "@/components/icons"
-import { createClient } from "@/lib/supabase/client"
+import { createSimpleClient } from "@/lib/supabase/simple-client"
 import { useRouter } from "next/navigation"
 import { ShoppingCart, User, LogOut } from "lucide-react"
 
 export function LandingNavBar() {
   const { user, loading } = useAuth()
   const router = useRouter()
-  const supabase = createClient()
+  const supabase = createSimpleClient()
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()

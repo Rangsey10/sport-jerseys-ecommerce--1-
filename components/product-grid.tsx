@@ -58,6 +58,15 @@ export function ProductGrid({ limit, searchParams }: ProductGridProps) {
         })
       }
 
+      // Filter for new arrivals (get the most recent products)
+      if (searchParams?.newArrivals) {
+        // Sort by newest first, then take a portion as "new arrivals"
+        const sortedByNewest = [...filteredProducts].reverse()
+        // Consider the latest 60% of products as "new arrivals"
+        const newArrivalsCount = Math.ceil(sortedByNewest.length * 0.6)
+        filteredProducts = sortedByNewest.slice(0, newArrivalsCount)
+      }
+
       // Apply sorting
       if (searchParams?.sort) {
         const sortBy = searchParams.sort as string
@@ -122,7 +131,11 @@ export function ProductGrid({ limit, searchParams }: ProductGridProps) {
         searchParams?.featured ? (
           <ProductDisplay key={product.id} product={product} />
         ) : (
-          <ProductCard key={product.id} product={product} />
+          <ProductCard 
+            key={product.id} 
+            product={product} 
+            showNewBadge={!!searchParams?.newArrivals}
+          />
         )
       ))}
     </div>

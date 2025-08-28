@@ -17,7 +17,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Eye, EyeOff, Chrome } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
-import { createClient } from "@/lib/supabase/client"
+import { createSimpleClient } from "@/lib/supabase/simple-client"
 
 export function LoginForm() {
   const [showPassword, setShowPassword] = useState(false)
@@ -25,32 +25,88 @@ export function LoginForm() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const router = useRouter()
-  const supabase = createClient()
+  const supabase = createSimpleClient()
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
       if (error) {
+        console.error('Auth error:', error)
         toast({
           title: "Login failed",
-          description: error.message,
+          description: error.message || "Invalid email or password",
           variant: "destructive",
         })
-      } else {
+        return
+      }
+
+      if (!data.user) {
         toast({
-          title: "Login successful!",
-          description: "Welcome back to Jersey Store.",
+          title: "Login failed",
+          description: "No user data received",
+          variant: "destructive",
+        })
+        return
+      }
+
+      // Check user role from profile
+      console.log('Looking up profile for user:', data.user.id)
+      
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('role, first_name, last_name')
+        .eq('id', data.user.id)
+        .single()
+
+      console.log('Profile lookup result:', { profile, profileError, userId: data.user.id })
+
+      if (profileError) {
+        console.error('Profile lookup error:', profileError)
+        toast({
+          title: "Profile Error",
+          description: "Could not load user profile. Redirecting to homepage.",
+          variant: "destructive",
         })
         router.push("/homepage")
-        router.refresh()
+        return
       }
+
+      const userRole = profile?.role || 'user'
+      const userName = profile?.first_name || 'User'
+      console.log('User role determined:', userRole)
+      console.log('Full profile data:', profile)
+
+      toast({
+        title: "Login successful!",
+        description: `Welcome back, ${userName}! (${userRole})`,
+      })
+
+      // Redirect based on role with explicit logging
+      if (userRole === 'admin') {
+        console.log('🔑 Admin user detected - Redirecting to /admin')
+        setTimeout(() => {
+          router.push("/admin")
+          router.refresh()
+        }, 1000)
+      } else {
+        console.log('👤 Regular user detected - Redirecting to /homepage')
+        setTimeout(() => {
+          router.push("/homepage")
+          router.refresh()
+        }, 1000)
+      }
+      
+      // Refresh after navigation
+      setTimeout(() => {
+        router.refresh()
+      }, 100)
     } catch (error) {
       toast({
         title: "Login failed",

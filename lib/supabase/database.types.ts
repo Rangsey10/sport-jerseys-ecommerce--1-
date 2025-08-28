@@ -6,30 +6,27 @@ export interface Database {
       profiles: {
         Row: {
           id: string
-          email: string
+          email: string | null
           first_name: string | null
           last_name: string | null
-          role: "customer" | "admin"
+          role: "user" | "admin"
           created_at: string
-          updated_at: string
         }
         Insert: {
           id: string
-          email: string
+          email?: string | null
           first_name?: string | null
           last_name?: string | null
-          role?: "customer" | "admin"
+          role?: "user" | "admin"
           created_at?: string
-          updated_at?: string
         }
         Update: {
           id?: string
-          email?: string
+          email?: string | null
           first_name?: string | null
           last_name?: string | null
-          role?: "customer" | "admin"
+          role?: "user" | "admin"
           created_at?: string
-          updated_at?: string
         }
       }
       products: {

@@ -16,9 +16,10 @@ import {
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Eye, EyeOff, Chrome } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
-import { createClient } from "@/lib/supabase/client"
+import { createSimpleClient } from "@/lib/supabase/simple-client"
 
 export function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false)
@@ -29,14 +30,22 @@ export function RegisterForm() {
     email: "",
     password: "",
     confirmPassword: "",
+    role: "user", // default to user
   })
   const router = useRouter()
-  const supabase = createClient()
+  const supabase = createSimpleClient()
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
       ...prev,
       [e.target.name]: e.target.value,
+    }))
+  }
+
+  const handleRoleChange = (value: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      role: value,
     }))
   }
 
@@ -55,13 +64,14 @@ export function RegisterForm() {
     }
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
           data: {
             first_name: formData.firstName,
             last_name: formData.lastName,
+            role: formData.role,
           },
         },
       })
@@ -72,10 +82,50 @@ export function RegisterForm() {
           description: error.message,
           variant: "destructive",
         })
-      } else {
+      } else if (data.user) {
+        console.log('Registration successful, creating profile...')
+        
+        // Create profile record directly
+        const profileData = {
+          id: data.user.id,
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          email: formData.email,
+          role: formData.role,
+        }
+        
+        console.log('Inserting profile data:', profileData)
+        
+        const { data: profileResult, error: profileError } = await supabase
+          .from('profiles')
+          .insert(profileData)
+          .select()
+
+        if (profileError) {
+          console.log('Profile creation error:', JSON.stringify(profileError))
+          
+          // Try to update if insert failed (might already exist)
+          const { error: updateError } = await supabase
+            .from('profiles')
+            .update({ 
+              role: formData.role,
+              first_name: formData.firstName,
+              last_name: formData.lastName 
+            })
+            .eq('id', data.user.id)
+          
+          if (updateError) {
+            console.log('Profile update error:', JSON.stringify(updateError))
+          } else {
+            console.log('Profile updated successfully')
+          }
+        } else {
+          console.log('Profile created successfully:', profileResult)
+        }
+        
         toast({
           title: "Account created successfully!",
-          description: "Please check your email to verify your account.",
+          description: `Welcome ${formData.role === 'admin' ? 'Administrator' : 'Customer'}! You can now sign in.`,
         })
         router.push("/auth/login")
       }
@@ -136,6 +186,21 @@ export function RegisterForm() {
                 onChange={handleChange}
                 required
               />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="role">Account Type</Label>
+              <Select value={formData.role} onValueChange={handleRoleChange}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select account type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="user">Customer</SelectItem>
+                  <SelectItem value="admin">Administrator</SelectItem>
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-gray-600">
+                Choose "Customer" to shop and purchase jerseys, or "Administrator" to manage products and orders.
+              </p>
             </div>
             <div className="grid gap-2">
               <Label htmlFor="password">Password</Label>
