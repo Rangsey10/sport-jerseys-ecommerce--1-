@@ -10,6 +10,11 @@ export async function middleware(req: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession()
 
+  // Redirect logged-in users from landing page to /homepage
+  if (req.nextUrl.pathname === "/" && session) {
+    return NextResponse.redirect(new URL("/homepage", req.url))
+  }
+
   // Protect admin routes
   if (req.nextUrl.pathname.startsWith("/admin")) {
     if (!session) {
@@ -35,5 +40,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*", "/checkout/:path*", "/orders/:path*"],
+  matcher: ["/", "/admin/:path*", "/checkout/:path*", "/orders/:path*"],
 }

@@ -1,18 +1,48 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import type { User } from "@supabase/supabase-js"
+
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Badge } from "@/components/ui/badge"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
-import { Search, ShoppingCart, User, Menu, Heart } from "lucide-react"
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
+import { Search, ShoppingCart, Menu, Heart, User as UserIcon, LogOut, LayoutDashboard } from "lucide-react"
 import { useCart } from "@/hooks/use-cart"
 
 export function Header() {
   const [isSearchOpen, setIsSearchOpen] = useState(false)
+  const [user, setUser] = useState<User | null>(null)
   const { items } = useCart()
+  const router = useRouter()
+  const supabase = createClientComponentClient()
   const itemCount = items.reduce((total, item) => total + item.quantity, 0)
+
+  useEffect(() => {
+    const getUser = async () => {
+      const { data } = await supabase.auth.getUser()
+      setUser(data.user)
+    }
+    getUser()
+  }, [supabase.auth])
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    setUser(null)
+    router.push("/")
+    router.refresh()
+  }
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -58,17 +88,14 @@ export function Header() {
 
           {/* Actions */}
           <div className="flex items-center space-x-2">
-            {/* Mobile Search */}
             <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setIsSearchOpen(!isSearchOpen)}>
               <Search className="h-5 w-5" />
             </Button>
 
-            {/* Wishlist */}
             <Button variant="ghost" size="icon" className="relative">
               <Heart className="h-5 w-5" />
             </Button>
 
-            {/* Cart */}
             <Button variant="ghost" size="icon" asChild className="relative">
               <Link href="/cart">
                 <ShoppingCart className="h-5 w-5" />
@@ -80,12 +107,40 @@ export function Header() {
               </Link>
             </Button>
 
-            {/* User Account */}
-            <Button variant="ghost" size="icon" asChild>
-              <Link href="/auth/login">
-                <User className="h-5 w-5" />
-              </Link>
-            </Button>
+            {user ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon">
+                    <UserIcon className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem asChild>
+                    <Link href="/admin">
+                      <LayoutDashboard className="mr-2 h-4 w-4" />
+                      <span>Dashboard</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <Link href="/orders">
+                      <ShoppingCart className="mr-2 h-4 w-4" />
+                      <span>Orders</span>
+                    </Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={handleLogout}>
+                    <LogOut className="mr-2 h-4 w-4" />
+                    <span>Log out</span>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : (
+              <Button variant="ghost" size="sm" asChild>
+                <Link href="/auth/login">Sign out</Link>
+              </Button>
+            )}
 
             {/* Mobile Menu */}
             <Sheet>
@@ -109,12 +164,26 @@ export function Header() {
                     About
                   </Link>
                   <hr />
-                  <Link href="/auth/login" className="text-lg font-medium hover:text-blue-600 transition-colors">
-                    Sign In
-                  </Link>
-                  <Link href="/auth/register" className="text-lg font-medium hover:text-blue-600 transition-colors">
-                    Create Account
-                  </Link>
+                  {user ? (
+                    <>
+                      <Link href="/admin" className="text-lg font-medium hover:text-blue-600 transition-colors">
+                        Dashboard
+                      </Link>
+                      <Link href="/orders" className="text-lg font-medium hover:text-blue-600 transition-colors">
+                        Orders
+                      </Link>
+                      <Button onClick={handleLogout} variant="ghost" className="justify-start text-lg font-medium">Log Out</Button>
+                    </>
+                  ) : (
+                    <>
+                      <Link href="/auth/login" className="text-lg font-medium hover:text-blue-600 transition-colors">
+                        Sign In
+                      </Link>
+                      <Link href="/auth/register" className="text-lg font-medium hover:text-blue-600 transition-colors">
+                        Create Account
+                      </Link>
+                    </>
+                  )}
                 </nav>
               </SheetContent>
             </Sheet>

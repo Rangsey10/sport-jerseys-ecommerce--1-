@@ -25,14 +25,19 @@ export function NewsletterSection() {
   }
 
   return (
-    <section className="py-20 bg-gradient-to-r from-blue-600 to-purple-700">
-      <div className="container mx-auto px-4">
+    <section className="py-24 bg-gradient-to-br from-gray-900 via-blue-900 to-blue-950 relative overflow-hidden">
+      <div className="absolute inset-0 bg-black/40" />
+      {/* Add animated background pattern */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute inset-0 bg-[url('/pattern-grid.svg')] bg-repeat [mask-image:linear-gradient(to_bottom,white,transparent)]" />
+      </div>
+      <div className="container mx-auto px-4 relative">
         <div className="max-w-4xl mx-auto text-center text-white">
           <div className="mb-8">
-            <Mail className="h-16 w-16 mx-auto mb-6 text-yellow-400" />
-            <h2 className="text-4xl font-bold mb-4">Stay in the Game</h2>
-            <p className="text-xl text-blue-100 max-w-2xl mx-auto">
-              Get exclusive deals, new arrivals, and insider news delivered straight to your inbox
+            <Mail className="h-16 w-16 mx-auto mb-6 text-blue-400" />
+            <h2 className="text-4xl font-bold mb-4">Join the Team</h2>
+            <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+              Get exclusive deals, early access to new releases, and VIP updates delivered to your inbox
             </p>
           </div>
 
@@ -46,18 +51,21 @@ export function NewsletterSection() {
                 className="flex-1 bg-white/10 border-white/20 text-white placeholder:text-white/70"
                 required
               />
-              <Button type="submit" className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8">
+              <Button 
+                type="submit" 
+                className="bg-blue-500 hover:bg-blue-600 text-white font-semibold px-8"
+              >
                 Subscribe
               </Button>
             </form>
           ) : (
-            <div className="flex items-center justify-center gap-2 text-green-300">
+            <div className="flex items-center justify-center gap-2 text-blue-300">
               <CheckCircle className="h-6 w-6" />
-              <span className="text-lg font-semibold">You're all set!</span>
+              <span className="text-lg font-semibold">Welcome to the team!</span>
             </div>
           )}
 
-          <p className="text-sm text-blue-200 mt-4">No spam, unsubscribe at any time</p>
+          <p className="text-sm text-gray-400 mt-4">Join 50,000+ sports fans who trust us. Unsubscribe anytime.</p>
         </div>
       </div>
     </section>

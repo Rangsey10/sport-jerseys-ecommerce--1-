@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { ProductCard } from "@/components/product-card"
+import { ProductDisplay } from "@/components/product-display"
 import type { Product } from "@/lib/types"
 import { mockProducts } from "@/lib/mock-data"
 
@@ -116,9 +117,13 @@ export function ProductGrid({ limit, searchParams }: ProductGridProps) {
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
       {products.map((product) => (
-        <ProductCard key={product.id} product={product} />
+        searchParams?.featured ? (
+          <ProductDisplay key={product.id} product={product} />
+        ) : (
+          <ProductCard key={product.id} product={product} />
+        )
       ))}
     </div>
   )

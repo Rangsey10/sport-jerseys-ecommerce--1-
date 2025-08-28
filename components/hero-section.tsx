@@ -4,20 +4,27 @@ import Image from "next/image"
 
 export function HeroSection() {
   return (
-    <section className="relative bg-gradient-to-br from-blue-900 via-blue-800 to-purple-900 text-white overflow-hidden">
-      <div className="absolute inset-0 bg-black/20" />
+    <section className="relative bg-gradient-to-br from-gray-900 via-blue-900 to-blue-950 text-white overflow-hidden">
+      <div className="absolute inset-0 bg-black/40" />
+      {/* Add animated background pattern */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute inset-0 bg-[url('/pattern-grid.svg')] bg-repeat [mask-image:linear-gradient(to_bottom,white,transparent)]" />
+      </div>
       <div className="relative container mx-auto px-4 py-24 lg:py-32">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="space-y-8">
             <div className="space-y-4">
+              <span className="inline-block bg-blue-500/10 text-blue-300 px-4 py-2 rounded-full text-sm font-medium mb-4">
+                New Arrivals for 2025 Season
+              </span>
               <h1 className="text-5xl lg:text-7xl font-bold leading-tight">
-                Premium
-                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500">
+                Authentic
+                <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-400">
                   Sport Jerseys
                 </span>
               </h1>
-              <p className="text-xl lg:text-2xl text-blue-100 max-w-lg">
-                Authentic jerseys from your favorite teams and legendary players. Quality guaranteed, passion delivered.
+              <p className="text-xl lg:text-2xl text-gray-300 max-w-lg">
+                Wear the pride of your team. Premium quality jerseys from NBA, NFL, MLB, and international soccer.
               </p>
             </div>
 
@@ -51,19 +58,47 @@ export function HeroSection() {
             </div>
           </div>
 
-          <div className="relative">
-            <div className="relative z-10">
-              <Image
-                src="/placeholder.png"
-                alt="Featured Jersey"
-                width={500}
-                height={600}
-                className="rounded-2xl shadow-2xl"
-                priority
-              />
+          <div className="relative grid grid-cols-2 gap-4">
+            <div className="space-y-4">
+              <div className="relative h-48 rounded-lg overflow-hidden">
+                <Image
+                  src="/CristanoRonaldo.png"
+                  alt="Soccer Jersey"
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              </div>
+              <div className="relative h-48 rounded-lg overflow-hidden">
+                <Image
+                  src="/LionelMessi.png"
+                  alt="Soccer Jersey"
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              </div>
             </div>
-            <div className="absolute -top-4 -right-4 w-full h-full bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl opacity-20" />
-            <div className="absolute -bottom-4 -left-4 w-full h-full bg-gradient-to-tr from-purple-500 to-pink-500 rounded-2xl opacity-20" />
+            <div className="space-y-4 mt-8">
+              <div className="relative h-48 rounded-lg overflow-hidden">
+                <Image
+                  src="/Stephen curry.png"
+                  alt="Basketball Jersey"
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              </div>
+              <div className="relative h-48 rounded-lg overflow-hidden">
+                <Image
+                  src="/Tatum.png"
+                  alt="Basketball Jersey"
+                  fill
+                  className="object-cover"
+                  priority
+                />
+              </div>
+            </div>
           </div>
         </div>
       </div>
