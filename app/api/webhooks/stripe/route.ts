@@ -11,7 +11,7 @@ const stripe = process.env.STRIPE_SECRET_KEY
 const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 async function createOrder(paymentIntent: Stripe.PaymentIntent) {
-    const supabase = createServerClient();
+    const supabase = await createServerClient();
     const { userId, items: itemsString } = paymentIntent.metadata;
     const items = JSON.parse(itemsString);
   

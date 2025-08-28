@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import type { User } from "@supabase/supabase-js"
+import { createSafeClientComponentClient } from "@/lib/supabase/safe-clients"
 
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -26,22 +26,35 @@ export function Header() {
   const [user, setUser] = useState<User | null>(null)
   const { items } = useCart()
   const router = useRouter()
-  const supabase = createClientComponentClient()
   const itemCount = items.reduce((total, item) => total + item.quantity, 0)
 
   useEffect(() => {
     const getUser = async () => {
-      const { data } = await supabase.auth.getUser()
-      setUser(data.user)
+      try {
+        const supabase = await createSafeClientComponentClient()
+        if (supabase) {
+          const { data } = await supabase.auth.getUser()
+          setUser(data.user)
+        }
+      } catch (error) {
+        console.error('Error getting user:', error)
+      }
     }
     getUser()
-  }, [supabase.auth])
+  }, [])
 
   const handleLogout = async () => {
-    await supabase.auth.signOut()
-    setUser(null)
-    router.push("/")
-    router.refresh()
+    try {
+      const supabase = await createSafeClientComponentClient()
+      if (supabase) {
+        await supabase.auth.signOut()
+      }
+      setUser(null)
+      router.push("/")
+      router.refresh()
+    } catch (error) {
+      console.error('Error signing out:', error)
+    }
   }
 
   return (
