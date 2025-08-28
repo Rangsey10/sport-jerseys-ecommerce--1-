@@ -12,6 +12,8 @@ import { Heart, ShoppingCart, Star, Eye } from "lucide-react"
 import type { Product } from "@/lib/types"
 import { useCart } from "@/hooks/use-cart"
 import { toast } from "@/hooks/use-toast"
+import { useAuth } from "@/hooks/useAuth"
+import { useRouter } from "next/navigation"
 
 interface ProductCardProps {
   product: Product
@@ -21,14 +23,21 @@ export function ProductCard({ product }: ProductCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isWishlisted, setIsWishlisted] = useState(false)
   const { addItem } = useCart()
+  const { user } = useAuth()
+  const router = useRouter()
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()
+    if (!user) {
+      router.push("/auth/login")
+      return
+    }
     addItem(product)
     toast({
       title: "Added to cart",
       description: `${product.name} has been added to your cart.`,
     })
+    router.push("/cart")
   }
 
   const handleWishlist = (e: React.MouseEvent) => {

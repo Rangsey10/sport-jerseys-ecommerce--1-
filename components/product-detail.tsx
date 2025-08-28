@@ -12,6 +12,8 @@ import type { Product } from "@/lib/types"
 import { useCart } from "@/hooks/use-cart"
 import { toast } from "@/hooks/use-toast"
 import { mockProducts } from "@/lib/mock-data"
+import { useAuth } from "@/hooks/useAuth"
+import { useRouter } from "next/navigation"
 
 interface ProductDetailProps {
   productId: string
@@ -24,6 +26,8 @@ export function ProductDetail({ productId }: ProductDetailProps) {
   const [quantity, setQuantity] = useState(1)
   const [isWishlisted, setIsWishlisted] = useState(false)
   const { addItem } = useCart()
+  const { user } = useAuth()
+  const router = useRouter()
 
   useEffect(() => {
     // Simulate API call
@@ -39,6 +43,10 @@ export function ProductDetail({ productId }: ProductDetailProps) {
   }
 
   const handleAddToCart = () => {
+    if (!user) {
+      router.push("/auth/login")
+      return
+    }
     if (!selectedSize) {
       toast({
         title: "Please select a size",

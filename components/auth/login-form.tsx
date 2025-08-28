@@ -48,7 +48,7 @@ export function LoginForm() {
           title: "Login successful!",
           description: "Welcome back to Jersey Store.",
         })
-        router.push("/")
+        router.push("/homepage")
         router.refresh()
       }
     } catch (error) {
