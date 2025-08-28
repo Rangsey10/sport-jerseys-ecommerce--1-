@@ -1,15 +1,17 @@
 import { NextResponse } from "next/server";
 import Stripe from "stripe";
-import { createClient } from "@/lib/supabase/server";
+import { createServerClient } from "@/lib/supabase/server";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-04-10",
-});
+const stripe = process.env.STRIPE_SECRET_KEY 
+  ? new Stripe(process.env.STRIPE_SECRET_KEY!, {
+      apiVersion: "2025-08-27.basil",
+    })
+  : null;
 
-const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 async function createOrder(paymentIntent: Stripe.PaymentIntent) {
-    const supabase = createClient();
+    const supabase = createServerClient();
     const { userId, items: itemsString } = paymentIntent.metadata;
     const items = JSON.parse(itemsString);
   
@@ -50,6 +52,13 @@ async function createOrder(paymentIntent: Stripe.PaymentIntent) {
   }
 
 export async function POST(req: Request) {
+  if (!stripe || !webhookSecret) {
+    return NextResponse.json(
+      { error: "Stripe configuration missing" }, 
+      { status: 500 }
+    );
+  }
+
   const sig = req.headers.get("stripe-signature");
   const body = await req.text();
 

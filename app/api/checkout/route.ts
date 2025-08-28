@@ -2,11 +2,20 @@ import { NextResponse } from "next/server";
 import Stripe from "stripe";
 import { createServerClient } from "@/lib/supabase/server";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: "2024-04-10",
-});
+const stripe = process.env.STRIPE_SECRET_KEY
+  ? new Stripe(process.env.STRIPE_SECRET_KEY!, {
+      apiVersion: "2025-08-27.basil",
+    })
+  : null;
 
 export async function POST(req: Request) {
+  if (!stripe) {
+    return NextResponse.json(
+      { error: "Stripe configuration missing" }, 
+      { status: 500 }
+    );
+  }
+
   const { items, customer } = await req.json();
   const supabase = createServerClient();
 
