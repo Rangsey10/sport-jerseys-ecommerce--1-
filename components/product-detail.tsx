@@ -26,7 +26,7 @@ export function ProductDetail({ productId }: ProductDetailProps) {
   const [quantity, setQuantity] = useState(1)
   const [isWishlisted, setIsWishlisted] = useState(false)
   const { addItem } = useCart()
-  const { user } = useAuth()
+  const { user, loading } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
@@ -43,7 +43,20 @@ export function ProductDetail({ productId }: ProductDetailProps) {
   }
 
   const handleAddToCart = () => {
+    // Don't allow add to cart while auth is loading
+    if (loading) {
+      toast({
+        title: "Please wait",
+        description: "Loading user information...",
+      })
+      return
+    }
+    
     if (!user) {
+      toast({
+        title: "Login required",
+        description: "Please log in to add items to your cart.",
+      })
       router.push("/auth/login")
       return
     }
@@ -61,6 +74,9 @@ export function ProductDetail({ productId }: ProductDetailProps) {
       title: "Added to cart",
       description: `${product.name} (${selectedSize}) has been added to your cart.`,
     })
+    
+    // Redirect to cart page
+    router.push("/cart")
   }
 
   const handleWishlist = () => {

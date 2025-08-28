@@ -5,12 +5,10 @@ import { ProductGrid } from "@/components/product-grid"
 import { HeroSection } from "@/components/hero-section"
 import { FeaturedCategories } from "@/components/featured-categories"
 import { NewsletterSection } from "@/components/newsletter-section"
-import { LandingNavBar } from "@/components/layout/landing-nav"
 
 export default function HomePage() {
   return (
     <div className="min-h-screen">
-      <LandingNavBar />
       <HeroSection />
       <FeaturedCategories />
       <section className="py-20 bg-gradient-to-b from-white to-gray-50">

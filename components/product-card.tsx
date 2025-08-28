@@ -23,15 +23,25 @@ export function ProductCard({ product }: ProductCardProps) {
   const [currentImageIndex, setCurrentImageIndex] = useState(0)
   const [isWishlisted, setIsWishlisted] = useState(false)
   const { addItem } = useCart()
-  const { user } = useAuth()
+  const { user, loading } = useAuth()
   const router = useRouter()
 
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault()
+    
+    console.log('Add to cart clicked, user:', user) // Debug log
+    
     if (!user) {
+      console.log('No user found, redirecting to login') // Debug log
+      toast({
+        title: "Login required",
+        description: "Please log in to add items to your cart.",
+      })
       router.push("/auth/login")
       return
     }
+    
+    console.log('User found, adding to cart') // Debug log
     addItem(product)
     toast({
       title: "Added to cart",

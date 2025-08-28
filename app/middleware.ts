@@ -29,8 +29,10 @@ export async function middleware(req: NextRequest) {
     }
   }
 
-  // Protect checkout and cart routes
-  if (req.nextUrl.pathname.startsWith("/checkout") || req.nextUrl.pathname.startsWith("/orders")) {
+  // Protect checkout, cart, and orders routes
+  if (req.nextUrl.pathname.startsWith("/checkout") || 
+      req.nextUrl.pathname.startsWith("/orders") || 
+      req.nextUrl.pathname.startsWith("/cart")) {
     if (!session) {
       return NextResponse.redirect(new URL("/auth/login", req.url))
     }
@@ -40,5 +42,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/admin/:path*", "/checkout/:path*", "/orders/:path*"],
+  matcher: ["/", "/admin/:path*", "/checkout/:path*", "/orders/:path*", "/cart/:path*"],
 }

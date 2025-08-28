@@ -4,26 +4,28 @@ import { RelatedProducts } from "@/components/related-products"
 import { ProductReviews } from "@/components/product-reviews"
 
 interface ProductPageProps {
-  params: { id: string }
+  params: Promise<{ id: string }>
 }
 
-export default function ProductPage({ params }: ProductPageProps) {
+export default async function ProductPage({ params }: ProductPageProps) {
+  const resolvedParams = await params
+  
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto px-4 py-8">
         <Suspense fallback={<ProductDetailSkeleton />}>
-          <ProductDetail productId={params.id} />
+          <ProductDetail productId={resolvedParams.id} />
         </Suspense>
 
         <div className="mt-16 space-y-16">
           <Suspense fallback={<div>Loading reviews...</div>}>
-            <ProductReviews productId={params.id} />
+            <ProductReviews productId={resolvedParams.id} />
           </Suspense>
 
           <section>
             <h2 className="text-3xl font-bold mb-8">Related Products</h2>
             <Suspense fallback={<div>Loading related products...</div>}>
-              <RelatedProducts productId={params.id} />
+              <RelatedProducts productId={resolvedParams.id} />
             </Suspense>
           </section>
         </div>

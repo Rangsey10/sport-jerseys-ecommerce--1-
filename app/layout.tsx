@@ -2,7 +2,7 @@ import type React from "react"
 import type { Metadata } from "next"
 import { Inter } from "next/font/google"
 import "./globals.css"
-import { Header } from "@/components/layout/header"
+import { LandingNavBar } from "@/components/layout/landing-nav"
 import { Footer } from "@/components/layout/footer"
 import { CartProvider } from "@/providers/cart-provider"
 import { Toaster } from "@/components/ui/toaster"
@@ -26,7 +26,11 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <CartProvider>
-          {children}
+          <div className="min-h-screen flex flex-col">
+            <LandingNavBar />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </div>
           <Toaster />
         </CartProvider>
       </body>

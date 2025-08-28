@@ -3,14 +3,18 @@ import { ProductGrid } from "@/components/product-grid"
 import { ProductFilters } from "@/components/product-filters"
 import { SearchBar } from "@/components/search-bar"
 import { ProductSort } from "@/components/product-sort"
+import { DebugAuth } from "@/components/debug-auth"
 
 interface ProductsPageProps {
-  searchParams: { [key: string]: string | string[] | undefined }
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
-export default function ProductsPage({ searchParams }: ProductsPageProps) {
+export default async function ProductsPage({ searchParams }: ProductsPageProps) {
+  const resolvedSearchParams = await searchParams
+  
   return (
     <div className="min-h-screen bg-gray-50">
+      <DebugAuth />
       <div className="bg-white border-b">
         <div className="container mx-auto px-4 py-8">
           <div className="mb-6">
@@ -36,7 +40,7 @@ export default function ProductsPage({ searchParams }: ProductsPageProps) {
             </div>
 
             <Suspense fallback={<ProductGridSkeleton />}>
-              <ProductGrid searchParams={searchParams} />
+              <ProductGrid searchParams={resolvedSearchParams} />
             </Suspense>
           </main>
         </div>

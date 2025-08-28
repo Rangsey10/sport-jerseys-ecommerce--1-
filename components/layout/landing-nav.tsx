@@ -4,17 +4,39 @@ import Link from "next/link"
 import { useAuth } from "@/hooks/useAuth"
 import { Button } from "@/components/ui/button"
 import { Icons } from "@/components/icons"
-import { supabase } from "@/lib/supabase"
+import { createClient } from "@/lib/supabase/client"
 import { useRouter } from "next/navigation"
 import { ShoppingCart, User, LogOut } from "lucide-react"
 
 export function LandingNavBar() {
-  const { user } = useAuth()
+  const { user, loading } = useAuth()
   const router = useRouter()
+  const supabase = createClient()
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
     router.push("/")
+  }
+
+  // Show loading state while checking auth
+  if (loading) {
+    return (
+      <nav className="w-full bg-gradient-to-r from-blue-900 to-purple-900 text-white shadow-md">
+        <div className="container mx-auto px-4 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link href="/" className="flex items-center gap-2 font-bold text-xl">
+              <Icons.logo className="h-7 w-7" />
+              Jersey Store
+            </Link>
+            <Link href="/products" className="ml-6 hover:text-blue-300 transition-colors">Products</Link>
+            <Link href="/categories" className="ml-4 hover:text-blue-300 transition-colors">Categories</Link>
+          </div>
+          <div className="flex items-center gap-4">
+            <div className="h-10 w-32 bg-white/20 animate-pulse rounded"></div>
+          </div>
+        </div>
+      </nav>
+    )
   }
 
   return (
