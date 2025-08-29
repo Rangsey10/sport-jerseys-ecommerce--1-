@@ -1,10 +1,14 @@
+"use client"
+
 import { ProductForm } from "@/components/admin/product-form"
 import { AdminBreadcrumbs } from "@/components/admin/admin-breadcrumbs"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { ChevronLeft } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 export default function NewProductPage() {
+  const router = useRouter()
   return (
     <div className="container mx-auto px-4 py-8">
       <AdminBreadcrumbs 
@@ -29,7 +33,7 @@ export default function NewProductPage() {
       <div className="max-w-2xl">
         <ProductForm 
           product={null} 
-          onClose={() => window.history.back()} 
+          onClose={() => router.back()} 
         />
       </div>
     </div>
