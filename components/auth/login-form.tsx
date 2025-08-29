@@ -73,7 +73,7 @@ export function LoginForm() {
       
       const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('role, first_name, last_name')
+        .select('role, full_name')
         .eq('id', data.user.id)
         .single()
 
@@ -90,8 +90,8 @@ export function LoginForm() {
         return
       }
 
-      const userRole = profile?.role || 'user'
-      const userName = profile?.first_name || 'User'
+      const userRole = profile?.role || 'customer'
+      const userName = profile?.full_name || data.user.email?.split('@')[0] || 'User'
       console.log('User role determined:', userRole)
       console.log('Full profile data:', profile)
 

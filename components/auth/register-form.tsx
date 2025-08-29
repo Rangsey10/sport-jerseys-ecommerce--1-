@@ -19,7 +19,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Eye, EyeOff, Chrome } from "lucide-react"
 import { toast } from "@/hooks/use-toast"
-import { createSimpleClient } from "@/lib/supabase/simple-client"
+import { createSafeClientComponentClient } from "@/lib/supabase/safe-clients"
 
 export function RegisterForm() {
   const [showPassword, setShowPassword] = useState(false)
@@ -30,10 +30,9 @@ export function RegisterForm() {
     email: "",
     password: "",
     confirmPassword: "",
-    role: "user", // default to user
+    role: "customer", // default to customer
   })
   const router = useRouter()
-  const supabase = createSimpleClient()
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({
@@ -64,75 +63,86 @@ export function RegisterForm() {
     }
 
     try {
+      console.log('🔄 Starting registration process...')
+      
+      const supabase = await createSafeClientComponentClient()
+      
+      if (!supabase) {
+        toast({
+          title: "Connection Error",
+          description: "Unable to connect to authentication service",
+          variant: "destructive",
+        })
+        setIsLoading(false)
+        return
+      }
+
+      const fullName = `${formData.firstName} ${formData.lastName}`.trim()
+
       const { data, error } = await supabase.auth.signUp({
         email: formData.email,
         password: formData.password,
         options: {
           data: {
-            first_name: formData.firstName,
-            last_name: formData.lastName,
+            full_name: fullName,
             role: formData.role,
           },
         },
       })
 
       if (error) {
+        console.error('❌ Registration error:', error)
         toast({
           title: "Registration failed",
           description: error.message,
           variant: "destructive",
         })
-      } else if (data.user) {
-        console.log('Registration successful, creating profile...')
-        
-        // Create profile record directly
-        const profileData = {
-          id: data.user.id,
-          first_name: formData.firstName,
-          last_name: formData.lastName,
-          email: formData.email,
-          role: formData.role,
-        }
-        
-        console.log('Inserting profile data:', profileData)
-        
-        const { data: profileResult, error: profileError } = await supabase
-          .from('profiles')
-          .insert(profileData)
-          .select()
+        setIsLoading(false)
+        return
+      }
 
-        if (profileError) {
-          console.log('Profile creation error:', JSON.stringify(profileError))
+      if (data.user) {
+        console.log('✅ User created successfully:', data.user.id)
+        
+        // The profile will be created automatically by the database trigger
+        // But let's ensure it has the correct role
+        try {
+          await new Promise(resolve => setTimeout(resolve, 1000)) // Wait 1 second for trigger
           
-          // Try to update if insert failed (might already exist)
           const { error: updateError } = await supabase
             .from('profiles')
             .update({ 
               role: formData.role,
-              first_name: formData.firstName,
-              last_name: formData.lastName 
+              full_name: fullName
             })
             .eq('id', data.user.id)
           
           if (updateError) {
-            console.log('Profile update error:', JSON.stringify(updateError))
+            console.warn('⚠️ Profile update error:', updateError)
+            // Don't fail registration for this
           } else {
-            console.log('Profile updated successfully')
+            console.log('✅ Profile updated with role:', formData.role)
           }
-        } else {
-          console.log('Profile created successfully:', profileResult)
+        } catch (profileError) {
+          console.warn('⚠️ Profile setup warning:', profileError)
+          // Don't fail registration for this
         }
         
         toast({
-          title: "Account created successfully!",
-          description: `Welcome ${formData.role === 'admin' ? 'Administrator' : 'Customer'}! You can now sign in.`,
+          title: "Account created successfully! 🎉",
+          description: `Welcome ${formData.role === 'admin' ? 'Administrator' : 'Customer'}! Please check your email to verify your account, then you can sign in.`,
         })
-        router.push("/auth/login")
+        
+        // Redirect to login page
+        setTimeout(() => {
+          router.push("/auth/login")
+        }, 2000)
       }
     } catch (error) {
+      console.error('❌ Registration error:', error)
       toast({
         title: "Registration failed",
-        description: "An unexpected error occurred.",
+        description: "An unexpected error occurred. Please try again.",
         variant: "destructive",
       })
     } finally {
@@ -194,7 +204,7 @@ export function RegisterForm() {
                   <SelectValue placeholder="Select account type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="user">Customer</SelectItem>
+                  <SelectItem value="customer">Customer</SelectItem>
                   <SelectItem value="admin">Administrator</SelectItem>
                 </SelectContent>
               </Select>

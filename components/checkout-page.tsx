@@ -87,18 +87,30 @@ export function CheckoutPage() {
       // Create order in database
       const result = await orderService.createOrder(items, shippingAddress)
 
-      if (result.success) {
+      if (result.success && result.orderId) {
         toast({
           title: "Order placed successfully!",
           description: `Order #${result.orderId?.slice(0, 8)} has been created. Thank you for your purchase!`,
         })
         clearCart()
-        router.push("/orders")
+        
+        // Redirect to order confirmation page instead of orders list
+        router.push(`/order-confirmation?orderId=${result.orderId}`)
       } else {
-        throw new Error(result.error || 'Failed to create order')
+        // Log error for debugging
+        if (result.error) {
+          console.warn('Order creation failed:', result.error)
+        }
+        
+        toast({
+          title: "Order failed",
+          description: result.error || "There was an error processing your order. Please try again.",
+          variant: "destructive"
+        })
       }
     } catch (error) {
-      console.error('Checkout error:', error)
+      // Log error for debugging
+      console.warn('Checkout error:', error)
       toast({
         title: "Order failed",
         description: "There was an error processing your order. Please try again.",
